@@ -1,0 +1,9 @@
+{
+	"name": "DevOpsAcademy_Platform_Extension_Collection",
+	"extensions": [
+	  {
+			"url": "https://github.com/Accenture/adop-platform-extension-chef.git",
+			"description": "Platform extension which spins up a Chef server with Chef 12 installed"
+	  }
+	]
+}

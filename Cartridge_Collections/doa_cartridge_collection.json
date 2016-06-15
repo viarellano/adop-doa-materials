@@ -1,0 +1,54 @@
+{
+	"name": "DevOpsAcademy_Cartridge_Collection",
+	"cartridges": [{
+		"folder": {
+			"name": "Module3_FOSS_Java",
+			"display_name": "Module 3 - FOSS_Java",
+			"description": "This pipeline is used in Module 3 - Making changes and triggering a new pipeline"
+		},
+		"cartridge": {
+			"url": "https://github.com/Accenture/adop-cartridge-java.git",
+			"desc": "FOSS Java cartridge"
+		}
+	}, {
+		"folder": {
+			"name": "Module3_FOSS_Java_Manual",
+			"display_name": "Module 3 - FOSS Java Manual",
+			"description": "This pipeline is used in Module 3 - Application Deployment"
+		},
+		"cartridge": {
+			"url": "https://github.com/Accenture/adop-cartridge-doa-m3.git",
+			"desc": "FOSS Java Cartridge (Manual)"
+		}
+	}, {
+		"folder": {
+			"name": "Module5_Chef",
+			"display_name": "Module 5 - Chef CI",
+			"description": "This pipeline is used in Module 5 - Chef CI Walkthrough"
+		},
+		"cartridge": {
+			"url": "https://github.com/Accenture/adop-cartridge-chef.git",
+			"desc": "Chef CI cartridge"
+		}
+	}, {
+		"folder": {
+			"name": "Module6_Docker",
+			"display_name": "Module 6 - Docker CI",
+			"description": "This pipeline is used in Module 6 - Build, pull and deploy a docker container in Jenkins"
+		},
+		"cartridge": {
+			"url": "https://github.com/Accenture/adop-cartridge-docker.git",
+			"desc": "Docker CI cartridge"
+		}
+	}, {
+		"folder": {
+			"name": "Module7_Module8_Labs",
+			"display_name": "Modules 7 and 8 - Miscellaneous Jobs",
+			"description": "These jobs are used in Module 7 (Deploy application to updated version of Tomcat) and Module 8 (Triggering Cloud Watch Alarm)"
+		},
+		"cartridge": {
+			"url": "https://github.com/Accenture/adop-cartridge-doa-m7-m8.git",
+			"desc": "DevOps Academy Lab Cartridge"
+		}
+	}]
+}

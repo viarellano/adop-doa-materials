@@ -1,0 +1,92 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS CloudFormation Sample Template to launch instance with Tomcat configured on port 80.",
+  "Parameters": {
+    "VpcID": {
+      "Description": "VPC Id of existing stack. See Output section of your stack.",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "VPCSubnet": {
+      "Description": "Public subnet Id of your stack. See Output section of your stack.",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "AvailabilityZone": {
+      "Description": "The availability zone of your stack. Go to VPC -> Subnet in AWS console.",
+      "Type": "String",
+      "Default": "eu-west-1a"
+    },
+	"KeyName": {
+		"Description": "Key-pair name to use.",
+		"Type": "AWS::EC2::KeyPair::KeyName"
+	}
+  },
+  "Resources": {
+    "InstanceSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable SSH access and HTTP access on the configured port",
+        "VpcId" : {
+          "Ref": "VpcID"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "80",
+            "ToPort": "80",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "LaunchConfig": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "KeyName": {
+            "Ref": "KeyName"
+		},
+        "ImageId": "ami-00369873",
+        "AssociatePublicIpAddress": true,
+        "SecurityGroups": [
+          {
+            "Ref": "InstanceSecurityGroup"
+          }
+        ],
+        "InstanceType": "m1.small"
+      }
+    },
+
+    "WebServerGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AvailabilityZones" : [
+            {
+                "Ref": "AvailabilityZone"
+            }
+          ],
+        "LaunchConfigurationName": {
+          "Ref": "LaunchConfig"
+        },
+        "MinSize": "1",
+        "MaxSize": "1",
+        "Tags" : [ 
+          {
+            "Key" : "Name",
+            "Value" : "Academy-Module7-Tomcat7",
+            "PropagateAtLaunch" : "true"
+          }
+        ],
+        "VPCZoneIdentifier": [
+          {
+            "Ref": "VPCSubnet"
+          }
+        ]
+      }
+    }
+  }
+}
