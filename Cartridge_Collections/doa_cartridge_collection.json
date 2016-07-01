@@ -2,9 +2,9 @@
 	"name": "DevOpsAcademy_Cartridge_Collection",
 	"cartridges": [{
 		"folder": {
-			"name": "Module3_FOSS_Java",
-			"display_name": "Module 3 - FOSS_Java",
-			"description": "This pipeline is used in Module 3 - Making changes and triggering a new pipeline"
+			"name": "Module2_Module3_FOSS_Java",
+			"display_name": "Module 2 and 3 - FOSS_Java",
+			"description": "This pipeline is used in Module 2 (Gitflow Branching model) and Module 3 (Making changes and triggering a new pipeline)"
 		},
 		"cartridge": {
 			"url": "https://github.com/Accenture/adop-cartridge-java.git",
