@@ -1,3 +1,330 @@
 {
-	"_comment" "TO-DO insert CF template to standup single instance ADOP here"
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "DOA Stack with ADOP Gen 5",
+    "Mappings": {
+        "RegionMap": {
+          "eu-central-1": {
+            "AMI": "ami-9bf712f4"
+          },
+          "eu-west-1": {
+            "AMI": "ami-7abd0209"
+          },
+          "us-east-1": {
+            "AMI": "ami-6d1c2007"
+          },
+          "us-west-2": {
+            "AMI": "ami-d2c924b2"
+          },
+          "us-west-1": {
+            "AMI": "ami-af4333cf"
+          },
+          "ap-southeast-2": {
+            "AMI": "ami-fedafc9d"
+          }
+        }
+    },
+    "Outputs": {
+        "ReleaseNote": {
+            "Description": "This is your starting point, please copy this URL into your web browser.",
+            "Value": {
+                "Fn::Join": [
+                    "", [
+                        "http://", {
+                            "Fn::GetAtt": [
+                                "DOAEc2Instance",
+                                "PublicIp"
+                            ]
+                        },
+                        "/"
+                    ]
+                ]
+            }
+        }
+    },
+    "Parameters": {
+        "AdopUsername": {
+            "Default": "changeme",
+            "Description": "ADOP admin account username. Username can not be set to 'admin' or 'Admin' and it must contain only letters and numbers. Minimum length is 3.",
+            "Type": "String",
+            "MinLength": "3",
+            "AllowedPattern": "(?!admin|Admin)[A-Za-z0-9.]*",
+            "ConstraintDescription": "Username can not be set to 'admin' or 'Admin' and it must contain only letters and numbers and minimum length is 3."
+        },
+        "AdopUserPassword": {
+            "NoEcho": "true",
+            "Description": "ADOP admin account password. Must be at least 8 characters long and contain at least one number, and cannot contain word \"password\" or your username",
+            "Type": "String",
+            "MinLength": "8",
+            "AllowedPattern": "(?!password|Password)[A-Za-z0-9]*([a-zA-Z]+[0-9]+|[0-9]+[a-zA-Z]+)",
+            "ConstraintDescription": "Password must contain only letters and numbers, it must contain at least one number, and cannot contain your username or word \"password\""
+        },
+        "AwsAccessKey": {
+            "NoEcho": "true",
+            "Description": "AWS Access key for jenkins",
+            "Type": "String",
+            "MinLength": "8"
+        },
+        "AwsSecretKey": {
+            "NoEcho": "true",
+            "Description": "AWS Secret key for jenkins",
+            "Type": "String",
+            "MinLength": "8"
+        },
+        "KeyName": {
+            "Description": "Key-pair name to use. Note : Make sure you choose a key which you have.",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        }
+    },
+    "Resources": {
+        "DOAEc2Instance": {
+            "Properties": {
+                "BlockDeviceMappings": [{
+                    "DeviceName": "/dev/sda1",
+                    "Ebs": {
+                        "DeleteOnTermination": "true",
+                        "VolumeSize": 50,
+                        "VolumeType": "gp2"
+                    }
+                }],
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "RegionMap", {
+                            "Ref": "AWS::Region"
+                        },
+                        "AMI"
+                    ]
+                },
+                "InstanceType": "m4.xlarge",
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "NetworkInterfaces": [{
+                    "AssociatePublicIpAddress": "true",
+                    "DeleteOnTermination": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [{
+                        "Ref": "DoaSecurityGroup"
+                    }],
+                    "SubnetId": {
+                        "Ref": "PublicSubnet"
+                    }
+                }],
+                "Tags": [
+                  {
+                    "Key": "Name",
+                    "Value": {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          {
+                            "Ref": "AWS::StackName"
+                          },
+                          "ADOPInstance"
+                        ]
+                      ]
+                    }
+                  }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "", [
+                                "#!/bin/bash\n",
+                                "cat > /etc/yum.repos.d/docker.repo <<-'EOF'\n",
+                                "[dockerrepo]\n",
+                                "name=Docker Repository\n",
+                                "baseurl=https://yum.dockerproject.org/repo/main/centos/$releasever/\n",
+                                "enabled=1\n",
+                                "gpgcheck=1\n",
+                                "gpgkey=https://yum.dockerproject.org/gpg\n",
+                                "EOF\n",
+                                "echo '\n==============================================================================='\n",
+                                "echo '=========================== Installing Yum Packages ==========================='\n",
+                                "echo '===============================================================================\n'\n",
+                                "yum -y install wget\n",
+                                "yum -y install unzip\n",
+                                "yum -y install git\n",
+                                "yum -y install docker-engine-1.10.3-1.el7.centos.x86_64\n",
+                                "grep 'tcp://0.0.0.0:2375' /usr/lib/systemd/system/docker.service || sed -i 's#ExecStart\\(.*\\)$#ExecStart\\1 -H tcp://0.0.0.0:2375#' /usr/lib/systemd/system/docker.service\n",
+                                "systemctl daemon-reload && systemctl restart docker\n",
+                                "echo '\n==============================================================================='\n",
+                                "echo '============================== Installing AWS CLI ============================='\n",
+                                "echo '===============================================================================\n'\n",
+                                "wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm\n",
+                                "rpm -Uvh epel-release-6-8.noarch.rpm\n",
+                                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                                "echo '=========================== Installing Docker Compose =========================='\n",
+                                "curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname -s`-`uname -m` > /usr/bin/docker-compose\n",
+                                "chmod +x /usr/bin/docker-compose\n",
+                                "echo '=========================== Running Docker Compose =========================='\n",
+                                "export IP=$(hostname --ip-address)\n",
+                                "export PUBLIC_IP=$(curl http://instance-data/latest/meta-data/public-ipv4)\n",
+                                "export PRIVATE_IP=$(curl http://instance-data/latest/meta-data/local-ipv4)\n",
+                                "export INITIAL_ADMIN_USER=", {"Ref": "AdopUsername"}, "\n",
+                                "export INITIAL_ADMIN_PASSWORD_PLAIN=", {"Ref": "AdopUserPassword"}, "\n",
+                                "export JENKINS_TOKEN=gAsuE35s\n",
+                                "export DOCKER_HOST=tcp://${PRIVATE_IP}:2375\n",
+                                "set -e\n",
+                                "mkdir -p /data && cd /data\n",
+                                "git clone https://github.com/Accenture/adop-docker-compose\n",
+
+                                "cd /data/adop-docker-compose\n",
+                                
+                                "export METADATA_URL='http://169.254.169.254/latest/meta-data'\n",
+                                "export MAC_ADDRESS=$(curl -s ${METADATA_URL}/network/interfaces/macs/)\n",
+                                "export AWS_VPC_ID=$(curl -s ${METADATA_URL}/network/interfaces/macs/${MAC_ADDRESS}/vpc-id/)\n",
+                                "export AWS_SUBNET_ID=$(curl -s ${METADATA_URL}/network/interfaces/macs/${MAC_ADDRESS}/subnet-id/)\n",
+                                "export AWS_AZ=$(curl -s ${METADATA_URL}/placement/availability-zone)\n",
+                                "export AWS_DEFAULT_REGION=${AWS_AZ%?}\n",
+                                "echo \"export AWS_VPC_ID=${AWS_VPC_ID}\" > conf/provider/env.provider.aws.sh\n",
+                                "echo \"export AWS_SUBNET_ID=${AWS_SUBNET_ID}\" >> conf/provider/env.provider.aws.sh \n",
+                                "echo \"export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}\" >> conf/provider/env.provider.aws.sh \n",
+                                "echo \"export AWS_INSTANCE_TYPE='t2.large'\" >> conf/provider/env.provider.aws.sh\n",
+                                "echo \"export AWS_KEYPAIR='",{"Ref": "KeyName"},"'\" >> conf/provider/env.provider.aws.sh\n",
+                                "./adop compose -i ${PUBLIC_IP} -f etc/aws/default.yml init\n",
+                                "sleep 10\n",
+                                "until [[ $(curl -X GET -s ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN}@${PUBLIC_IP}/jenkins/job/Load_Platform/lastBuild/api/json?pretty=true|grep result|cut -d$' ' -f5|sed 's|[^a-zA-Z]||g') == SUCCESS ]]; do echo \"Load_Platform job not finished, sleeping for 5s\"; sleep 5; done\n",
+                                "./adop target set -t http://${PUBLIC_IP} -u ${INITIAL_ADMIN_USER} -p ${INITIAL_ADMIN_PASSWORD_PLAIN}\n",
+
+                                "cd /data; git clone http://${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN}@${PUBLIC_IP}/gerrit/platform-management.git\n",
+                                "cd /data/platform-management\n",
+                                "echo \"https://github.com/Accenture/adop-cartridge-java.git\" > cartridges.txt\n",
+                                "echo \"https://github.com/Accenture/adop-cartridge-doa-m3.git\" >> cartridges.txt\n",
+                                "echo \"https://github.com/Accenture/adop-cartridge-chef.git\" >> cartridges.txt\n",
+                                "echo \"https://github.com/Accenture/adop-cartridge-docker.git\" >> cartridges.txt\n",
+                                "echo \"https://github.com/Accenture/adop-cartridge-doa-m7-m8.git\" >> cartridges.txt\n",
+                                "git add cartridges.txt && git commit -m \"Added DOA cartridges\" && git push origin master\n",
+                                
+                                "curl -X POST ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN}@${PUBLIC_IP}/jenkins/job/Platform_Management/job/Load_Cartridge_List/build --data token=$JENKINS_TOKEN\n",
+                                "curl -X POST ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN}@${PUBLIC_IP}/jenkins/job/Platform_Management/job/Setup_Gerrit/build --data token=$JENKINS_TOKEN\n",
+                                "sleep 10\n",
+                                "until [[ $(curl -X GET -s ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN}@${PUBLIC_IP}/jenkins/job/Platform_Management/job/Load_Cartridge_List/lastBuild/api/json?pretty=true|grep result|cut -d$' ' -f5|sed 's|[^a-zA-Z]||g') == SUCCESS ]]; do echo \"Load_Cartridge_List job not finished, sleeping for 5s\"; sleep 5; done\n",
+
+                                "cd /data/adop-docker-compose\n",
+                                "./adop workspace -w DOA create; sleep 10\n",
+                                "./adop project -p Labs -w DOA create; sleep 10\n",
+                                "./adop project -p Labs -w DOA load_collection -c https://raw.githubusercontent.com/Accenture/adop-doa-materials/master/Cartridge_Collections/doa_cartridge_collection.json\n",
+                                "./adop extension add_credentials -u ",{"Ref": "AwsAccessKey"}," -p ",{"Ref": "AwsSecretKey"}," -i aws\n",
+                                "set +e\n",
+                                "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\",",
+                                "\"Reason\" : \"DOA is ready\",",
+                                "\"UniqueId\" : \"DOAEc2Instance\",",
+                                "\"Data\" : \"Done\"}' ",
+                                "\"", {"Ref": "DOAWaitConditionHandle"}, "\"\n",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "DoaSecurityGroup": {
+            "Properties": {
+                "GroupDescription": "Enabling access to all IPs and below listed ports",
+                "SecurityGroupIngress": [{
+                    "CidrIp": "0.0.0.0/0",
+                    "FromPort": "22",
+                    "IpProtocol": "tcp",
+                    "ToPort": "22"
+                }, {
+                    "CidrIp": "0.0.0.0/0",
+                    "FromPort": "80",
+                    "IpProtocol": "tcp",
+                    "ToPort": "80"
+                }, {
+                    "CidrIp": "0.0.0.0/0",
+                    "FromPort": "443",
+                    "IpProtocol": "tcp",
+                    "ToPort": "443"
+                }, {
+                    "CidrIp": "10.0.0.0/16",
+                    "FromPort": "25826",
+                    "IpProtocol": "udp",
+                    "ToPort": "25826"
+                }],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "PublicRouteDefault": {
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "VpcInternetGateway"
+                },
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                }
+            },
+            "Type": "AWS::EC2::Route"
+        },
+        "PublicRouteTable": {
+            "Properties": {
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "PublicSubnet": {
+            "Properties": {
+                "CidrBlock": "10.0.1.0/24",
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PublicSubnetPublicRouteTableAssoc": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnet"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "Vpc": {
+            "Properties": {
+                "CidrBlock": "10.0.0.0/16",
+                "EnableDnsHostnames": "true",
+                "EnableDnsSupport": "true"
+            },
+            "Type": "AWS::EC2::VPC"
+        },
+        "VpcGatewayAttachment": {
+            "Properties": {
+                "InternetGatewayId": {
+                    "Ref": "VpcInternetGateway"
+                },
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::VPCGatewayAttachment"
+        },
+        "VpcInternetGateway": {
+            "Type": "AWS::EC2::InternetGateway"
+        },
+        "DOAWaitConditionHandle": {
+            "Type": "AWS::CloudFormation::WaitConditionHandle",
+            "Properties": {}
+        },
+        "DOAWaitCondition": {
+            "Type": "AWS::CloudFormation::WaitCondition",
+            "DependsOn": "DOAEc2Instance",
+            "Properties": {
+                "Handle": {
+                    "Ref": "DOAWaitConditionHandle"
+                },
+                "Timeout": "3000"
+            }
+        }
+    }
 }
+

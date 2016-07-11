@@ -1,6 +1,28 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "AWS CloudFormation Sample Template to launch instance with Tomcat configured on port 80.",
+  "Mappings": {
+      "RegionMap": {
+        "eu-central-1": {
+          "AMI": "ami-049b6e6b"
+        },
+        "eu-west-1": {
+          "AMI": "ami-00369873"
+        },
+        "us-east-1": {
+          "AMI": "ami-542eae43"
+        },
+        "us-west-2": {
+          "AMI": "ami-b361a2d3"
+        },
+        "us-west-1": {
+          "AMI": "ami-698acc09"
+        },
+        "ap-southeast-2": {
+          "AMI": "ami-f0406a93"
+        }
+      }
+  },  
   "Parameters": {
     "VpcID": {
       "Description": "VPC Id of existing stack. See Output section of your stack.",
@@ -15,10 +37,10 @@
       "Type": "String",
       "Default": "eu-west-1a"
     },
-	"KeyName": {
-		"Description": "Key-pair name to use.",
-		"Type": "AWS::EC2::KeyPair::KeyName"
-	}
+	  "KeyName": {
+	   	"Description": "Key-pair name to use.",
+	   	"Type": "AWS::EC2::KeyPair::KeyName"
+	  }
   },
   "Resources": {
     "InstanceSecurityGroup": {
@@ -50,7 +72,14 @@
         "KeyName": {
             "Ref": "KeyName"
 		},
-        "ImageId": "ami-00369873",
+        "ImageId": {
+                    "Fn::FindInMap": [
+                        "RegionMap", {
+                            "Ref": "AWS::Region"
+                        },
+                        "AMI"
+                    ]
+        },
         "AssociatePublicIpAddress": true,
         "SecurityGroups": [
           {
