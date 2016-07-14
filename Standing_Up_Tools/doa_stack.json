@@ -20,6 +20,9 @@
           },
           "ap-southeast-2": {
             "AMI": "ami-fedafc9d"
+          },
+          "ap-south-1": {
+            "AMI": "ami-95cda6fa"
           }
         }
     },
@@ -322,7 +325,7 @@
                 "Handle": {
                     "Ref": "DOAWaitConditionHandle"
                 },
-                "Timeout": "3000"
+                "Timeout": "1800"
             }
         }
     }
