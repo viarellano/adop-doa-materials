@@ -18,6 +18,9 @@
           "us-west-1": {
             "AMI": "ami-af4333cf"
           },
+          "ap-southeast-1":{
+            "AMI": "ami-f068a193"
+          },
           "ap-southeast-2": {
             "AMI": "ami-fedafc9d"
           },
