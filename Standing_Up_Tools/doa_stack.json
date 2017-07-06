@@ -142,7 +142,7 @@
                                 "echo '=========================== Installing Yum Packages ==========================='\n",
                                 "echo '===============================================================================\n'\n",
                                 "yum -y install wget unzip git\n",
-                                "grep 'tcp://0.0.0.0:2375' /usr/lib/systemd/system/docker.service || sed -i 's#ExecStart\\(.*\\)$#ExecStart\\1 -H tcp://0.0.0.0:2375#' /usr/lib/systemd/system/docker.service\n",
+                                "grep 'tcp://0.0.0.0:2375' /usr/lib/systemd/system/docker.service || sed -i 's#ExecStart\\(.*\\)$#ExecStart\\1 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock#' /usr/lib/systemd/system/docker.service\n",
                                 "systemctl daemon-reload && systemctl restart docker\n",
                                 "systemctl enable docker.service\n",
                                 "echo '\n==============================================================================='\n",
