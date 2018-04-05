@@ -7,7 +7,7 @@
           "AMI": "ami-049b6e6b"
         },
         "eu-west-1": {
-          "AMI": "ami-00369873"
+          "AMI": "ami-4bdd8332"
         },
         "us-east-1": {
           "AMI": "ami-542eae43"
@@ -19,10 +19,10 @@
           "AMI": "ami-698acc09"
         },
         "ap-southeast-1":{
-          "AMI": "ami-42f25121"
+          "AMI": "ami-141e3b68"
         },
         "ap-southeast-2": {
-          "AMI": "ami-f0406a93"
+          "AMI": "ami-620bc500"
         },
         "ap-south-1": {
           "AMI": "ami-16c8a279"
