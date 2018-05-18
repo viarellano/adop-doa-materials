@@ -28,7 +28,7 @@
 			"description": "This pipeline is used in Module 5 - Ansible CI Walkthrough"
 		},
 		"cartridge": {
-			"url": "https://github.com/Accenture/adop-cartridge-ansible.git",
+			"url": "https://github.com/Accenture/adop-cartridge-doa-m5.git",
 			"desc": "Ansible CI cartridge"
 		}
 	}, {
