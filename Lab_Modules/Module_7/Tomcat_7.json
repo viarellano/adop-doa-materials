@@ -1,31 +1,31 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "AWS CloudFormation Sample Template to launch instance with Tomcat configured on port 80.",
+  "Description": "AWS CloudFormation Sample Template to launch instance with Tomcat configured on port 8080.",
   "Mappings": {
       "RegionMap": {
         "eu-central-1": {
-          "AMI": "ami-049b6e6b"
+          "AMI": "ami-9a183671"
         },
         "eu-west-1": {
-          "AMI": "ami-4bdd8332"
+          "AMI": "ami-4c457735"
         },
         "us-east-1": {
-          "AMI": "ami-542eae43"
+          "AMI": "ami-d5bf2caa"
         },
         "us-west-2": {
-          "AMI": "ami-b361a2d3"
+          "AMI": "ami-5490ed2c"
         },
         "us-west-1": {
-          "AMI": "ami-698acc09"
+          "AMI": "ami-3b89905b"
         },
         "ap-southeast-1":{
-          "AMI": "ami-141e3b68"
+          "AMI": "ami-da6151a6"
         },
         "ap-southeast-2": {
-          "AMI": "ami-620bc500"
+          "AMI": "ami-0d13c26f"
         },
         "ap-south-1": {
-          "AMI": "ami-16c8a279"
+          "AMI": "ami-48301d27"
         }
       }
   },  
@@ -64,7 +64,7 @@
             "CidrIp": "0.0.0.0/0"
           },
           {
-            "IpProtocol": "tcp",
+            "IpProtocol": "tcp",						   		
             "FromPort": "80",
             "ToPort": "80",
             "CidrIp": "0.0.0.0/0"
@@ -92,7 +92,26 @@
             "Ref": "InstanceSecurityGroup"
           }
         ],
-        "InstanceType": "m1.small"
+        "InstanceType": "t2.medium",
+		"UserData": {
+			"Fn::Base64": {
+				"Fn::Join": [
+					"",
+					[
+						"#!/bin/bash\n",
+						"export IP=$(hostname --ip-address)\n",
+						"yum update -y\n",
+						"curl -fsSL https://get.docker.com/ | sh\n",
+						"service docker start\n",
+						"yum install -y unzip wget\n",
+						"sed -i s/SELINUX=enforcing/SELINUX=permissive/ /etc/selinux/config\n",
+						"setenforce 0\n",
+						"export IP=$(hostname --ip-address)\n",
+						"docker run -dt --name=tomcat7 -p 80:8080 tomcat:7.0\n"
+					]
+				]
+			}
+		}
       }
     },
 
@@ -125,3 +144,5 @@
     }
   }
 }
+
+	 
