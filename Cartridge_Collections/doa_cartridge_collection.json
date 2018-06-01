@@ -1,3 +1,4 @@
+
 {
 	"name": "DevOpsAcademy_Cartridge_Collection",
 	"cartridges": [{
@@ -22,13 +23,13 @@
 		}
 	}, {
 		"folder": {
-			"name": "Module5_Chef",
-			"display_name": "Module 5 - Chef CI",
-			"description": "This pipeline is used in Module 5 - Chef CI Walkthrough"
+			"name": "Module5_Ansible",
+			"display_name": "Module 5 - Ansible CI",
+			"description": "This pipeline is used in Module 5 - Ansible CI Walkthrough"
 		},
 		"cartridge": {
-			"url": "https://github.com/Accenture/adop-cartridge-chef.git",
-			"desc": "Chef CI cartridge"
+			"url": "https://github.com/Accenture/adop-cartridge-doa-m5.git",
+			"desc": "Ansible CI cartridge"
 		}
 	}, {
 		"folder": {

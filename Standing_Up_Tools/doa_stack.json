@@ -1,31 +1,44 @@
+
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "DOA Stack with ADOP Gen 5",
     "Mappings": {
         "RegionMap": {
           "eu-central-1": {
-            "AMI": "ami-9bf712f4"
+            "AMI": "ami-337be65c"
           },
           "eu-west-1": {
-            "AMI": "ami-7abd0209"
+            "AMI": "ami-6e28b517"
+          },
+          "eu-west-2": {
+            "AMI": "ami-ee6a718a"
+          },
+          "eu-west-3": {
+            "AMI": "ami-bfff49c2"
+          },
+          "ca-central-1": {
+            "AMI": "ami-dcad28b8"
           },
           "us-east-1": {
-            "AMI": "ami-6d1c2007"
+            "AMI": "ami-4bf3d731"
           },
           "us-west-2": {
-            "AMI": "ami-d2c924b2"
+            "AMI": "ami-a042f4d8"
           },
           "us-west-1": {
-            "AMI": "ami-af4333cf"
+            "AMI": "ami-65e0e305"
           },
           "ap-southeast-1":{
-            "AMI": "ami-f068a193"
+            "AMI": "ami-d2fa88ae"
           },
           "ap-southeast-2": {
-            "AMI": "ami-fedafc9d"
+            "AMI": "ami-b6bb47d4"
+          },
+          "ap-northeast-1": {
+            "AMI": "ami-25bd2743"
           },
           "ap-south-1": {
-            "AMI": "ami-95cda6fa"
+            "AMI": "ami-5d99ce32"
           }
         }
     },
@@ -148,7 +161,7 @@
                                 "echo '\n==============================================================================='\n",
                                 "echo '=========================== Installing Yum Packages ==========================='\n",
                                 "echo '===============================================================================\n'\n",
-                                "yum -y install docker-engine-1.10.3-1.el7.centos.x86_64\n",
+                                "yum -y install docker-engine-17.05.0.ce-1.el7.centos.x86_64\n",
                                 "systemctl daemon-reload && systemctl restart docker\n",
                                 "yum -y install wget unzip git\n",
                                 "grep 'tcp://0.0.0.0:2375' /usr/lib/systemd/system/docker.service || sed -i 's#ExecStart\\(.*\\)$#ExecStart\\1 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock#' /usr/lib/systemd/system/docker.service\n",
@@ -161,7 +174,7 @@
                                 "rpm -Uvh epel-release-6-8.noarch.rpm\n",
                                 "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
                                 "echo '=========================== Installing Docker Compose =========================='\n",
-                                "curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname -s`-`uname -m` > /usr/bin/docker-compose\n",
+                                "curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` > /usr/bin/docker-compose\n",
                                 "chmod +x /usr/bin/docker-compose\n",
                                 "echo '=========================== Running Docker Compose =========================='\n",
                                 "export IP=$(hostname --ip-address)\n",
@@ -197,11 +210,11 @@
                                 "cd /data/platform-management\n",
                                 "echo \"https://github.com/Accenture/adop-cartridge-java.git\" > cartridges.txt\n",
                                 "echo \"https://github.com/Accenture/adop-cartridge-doa-m3.git\" >> cartridges.txt\n",
-                                "echo \"https://github.com/Accenture/adop-cartridge-chef.git\" >> cartridges.txt\n",
+                                "echo \"https://github.com/Accenture/adop-cartridge-doa-m5.git\" >> cartridges.txt\n",
                                 "echo \"https://github.com/Accenture/adop-cartridge-docker.git\" >> cartridges.txt\n",
                                 "echo \"https://github.com/Accenture/adop-cartridge-doa-m7-m8.git\" >> cartridges.txt\n",
                                 "git add cartridges.txt && git commit -m \"Added DOA cartridges\" && git push origin master\n",
-                                
+
                                 "curl -X POST ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN}@${PUBLIC_IP}/jenkins/job/Platform_Management/job/Load_Cartridge_List/build --data token=$JENKINS_TOKEN\n",
                                 "curl -X POST ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN}@${PUBLIC_IP}/jenkins/job/Platform_Management/job/Setup_Gerrit/build --data token=$JENKINS_TOKEN\n",
                                 "sleep 10\n",
@@ -336,4 +349,3 @@
         }
     }
 }
-
